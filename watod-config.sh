@@ -1,7 +1,7 @@
 ## ----------------------- watod Configuration File Override ----------------------------
 
 ##
-## HINT: You can copy the contents of this file to a watod-config.local.sh 
+## HINT: You can copy the contents of this file to a watod-config.local.sh
 ##       file that is untrackable by git and readable by watod.
 ##
 
@@ -36,6 +36,6 @@ ACTIVE_MODULES="robot gazebo vis_tools"
 # Docker Registry to pull/push images. DEFAULT = "ghcr.io/watonomous/wato_monorepo"
 # REGISTRY_URL=""
 
-## Platform in which to build the docker images with. 
+## Platform in which to build the docker images with.
 ## Either arm64 (apple silicon, raspberry pi) or amd64 (most computers)
 # PLATFORM="amd64"
