@@ -20,7 +20,7 @@ fi
 
 ## ----------------------- Configuration (Subject to Override) ----------------------------
 
-COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-watod_$USER}
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-watod_medha}
 
 # Tag to use. Images as formatted as <IMAGE_NAME>:<TARGET_STAGE>-<TAG> with forward slashes replaced
 # with dashes

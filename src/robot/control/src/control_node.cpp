@@ -1,6 +1,79 @@
 #include "control_node.hpp"
 
-ControlNode::ControlNode(): Node("control"), control_(robot::ControlCore(this->get_logger())) {}
+
+ControlNode::ControlNode(): Node("control"), control_(robot::ControlCore(this->get_logger())) {
+  lookahead_distance_ = 1.0;
+  goal_tolerance_ = 0.1;
+  linear_speed_ = 0.5;
+  path_sub_ = this->create_subscription<nav_msgs::msg::Path>(
+      "/path", 10, [this](const nav_msgs::msg::Path::SharedPtr msg) { current_path_ = msg; });
+  odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+      "/odom/filtered", 10, [this](const nav_msgs::msg::Odometry::SharedPtr msg) { robot_odom_ = msg; });
+  cmd_vel_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
+  control_timer_ = this->create_wall_timer(
+    std::chrono::milliseconds(100), std::bind(&ControlNode::controlLoop, this));
+}
+
+void ControlNode::controlLoop() {
+  // Skip control if no path or odometry data is available yet
+  if (!current_path_ || !robot_odom_) {
+    return;
+  }
+
+  const auto &goal_position = current_path_->poses.back().pose.position;
+  double distance_to_goal = computeDistance(robot_odom_->pose.pose.position, goal_position);
+  if (distance_to_goal <= goal_tolerance_) {
+    geometry_msgs::msg::Twist stop_cmd;  // all fields default to 0
+    cmd_vel_pub_->publish(stop_cmd);
+    return;
+  }
+
+
+  auto lookahead_point = findLookaheadPoint();
+  if (!lookahead_point) {
+    return;  // No valid lookahead point found
+  }
+
+  auto cmd_vel = computeVelocity(*lookahead_point);
+  cmd_vel_pub_->publish(cmd_vel);
+}
+
+double ControlNode::extractYaw(const geometry_msgs::msg::Quaternion &quat) {
+  double siny_cosp = 2.0 * (quat.w * quat.z + quat.x * quat.y);
+  double cosy_cosp = 1.0 - 2.0 * (quat.y * quat.y + quat.z * quat.z);
+  return std::atan2(siny_cosp, cosy_cosp);
+}
+
+
+double ControlNode::computeDistance(const geometry_msgs::msg::Point &a, const geometry_msgs::msg::Point &b) {
+  double dx = b.x - a.x;
+  double dy = b.y - a.y;
+  return std::sqrt(dx * dx + dy * dy);
+}
+
+std::optional<geometry_msgs::msg::PoseStamped> ControlNode::findLookaheadPoint() {
+  for (const auto &pose : current_path_->poses) {
+    double distance = computeDistance(robot_odom_->pose.pose.position,pose.pose.position);
+    if(distance>= lookahead_distance_){
+      return pose;
+    }
+  }
+  return std::nullopt;
+}
+geometry_msgs::msg::Twist ControlNode::computeVelocity(const geometry_msgs::msg::PoseStamped &target) {
+  double dx = target.pose.position.x - robot_odom_->pose.pose.position.x;
+  double dy = target.pose.position.y - robot_odom_->pose.pose.position.y;
+  double target_angle = std::atan2(dy, dx);
+
+  double current_yaw = extractYaw(robot_odom_->pose.pose.orientation);
+
+  double angle_diff = target_angle - current_yaw;
+
+  geometry_msgs::msg::Twist cmd_vel;
+  cmd_vel.linear.x = linear_speed_;
+  cmd_vel.angular.z = angle_diff;
+  return cmd_vel;
+}
 
 int main(int argc, char ** argv)
 {
