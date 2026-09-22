@@ -23,7 +23,7 @@ double CostmapCore::getResolution() const{
 }
 
 void CostmapCore::initializeCostmap() {
-    costmap_data_.assign(width_ * height_, 0);
+    costmap_data_.assign(width_ * height_, -1);
 }
 
 void CostmapCore::markObstacle(int x_grid, int y_grid) {

@@ -47,6 +47,15 @@ std::vector<std::pair<double, double>> PlannerCore::planPath(
   CellIndex start = worldToGrid(map, start_x, start_y);
   CellIndex goal = worldToGrid(map, goal_x, goal_y);
 
+  if (!isValid(map, start)) {
+      RCLCPP_WARN(logger_, "invalid starting position, out of map bounds or occupied");
+      return {};
+  }
+  if (!isValid(map, goal)) {
+      RCLCPP_WARN(logger_, "goal position is not valid");
+      return {};
+  }
+
   std::priority_queue<AStarNode, std::vector<AStarNode>, CompareF> open_set;
   std::unordered_map<CellIndex, double, CellIndexHash> g_score;
   std::unordered_map<CellIndex, CellIndex, CellIndexHash> came_from;

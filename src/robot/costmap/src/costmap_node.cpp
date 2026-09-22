@@ -4,12 +4,12 @@
 #include "costmap_node.hpp"
 
 CostmapNode::CostmapNode() : Node("costmap"), costmap_(robot::CostmapCore(this->get_logger())) {
-    // Subscriber: /lidar, LaserScan
+    // Subscriber
     lidar_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>(
         "/lidar", 10,
         std::bind(&CostmapNode::laserCallback, this, std::placeholders::_1));
 
-    // Publisher: /costmap, OccupancyGrid
+    // Publisher
     costmap_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("/costmap", 10);
 }
 

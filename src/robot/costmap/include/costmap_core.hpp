@@ -23,12 +23,11 @@ class CostmapCore {
     double getResolution() const;
 
   private:
-    rclcpp::Logger logger_;
-    double resolution_ = 0.1;
-    int width_ = 300;
-    int height_ = 300;
-    std::vector<int8_t> costmap_data_;
-
+      rclcpp::Logger logger_;
+      double resolution_ = 0.1;
+      int width_ = 300;
+      int height_ = 300;
+      std::vector<int8_t> costmap_data_;
 };
 
 

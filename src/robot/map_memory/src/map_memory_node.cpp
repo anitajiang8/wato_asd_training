@@ -15,6 +15,8 @@ MapMemoryNode::MapMemoryNode()
 
       map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("/map", 10);
 
+      map_pub_->publish(map_memory_.getGlobalMap());
+
       timer_ = this->create_wall_timer(
         std::chrono::seconds(1),
         std::bind(&MapMemoryNode::updateMap, this));
@@ -48,9 +50,9 @@ void MapMemoryNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
 void MapMemoryNode::updateMap() {
     if (should_update_ && costmap_received_) {
         map_memory_.integrateCostmap(latest_costmap_, robot_x_, robot_y_, robot_yaw_);
-        map_pub_->publish(map_memory_.getGlobalMap());
         should_update_ = false;
     }
+    map_pub_->publish(map_memory_.getGlobalMap());
 }
 
 int main(int argc, char ** argv)

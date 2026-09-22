@@ -62,9 +62,14 @@ void PlannerNode::planPath() {
       robot_pose_.position.x, robot_pose_.position.y,
       goal_.point.x, goal_.point.y);
 
+  if (waypoints.empty()) {
+    RCLCPP_WARN(this->get_logger(), "No path found, not publishing an empty path");
+    return;
+  }
+
   nav_msgs::msg::Path path;
   path.header.stamp = this->get_clock()->now();
-  path.header.frame_id = "map";
+  path.header.frame_id = "sim_world";
 
   for (const auto &[x, y] : waypoints) {
     geometry_msgs::msg::PoseStamped pose;

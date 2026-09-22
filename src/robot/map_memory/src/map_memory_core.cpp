@@ -44,11 +44,9 @@ void MapMemoryCore::integrateCostmap(const nav_msgs::msg::OccupancyGrid& costmap
 
         if (gx >= 0 && gx < width_ && gy >= 0 && gy < height_) {
             int idx = gy * width_ + gx;
-            if (value > global_map_.data[idx]) {
             global_map_.data[idx] = value;
-            }
         }
-        }
+    }
     }
 }
 

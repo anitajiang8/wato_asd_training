@@ -20,6 +20,10 @@ void ControlNode::controlLoop() {
     return;
   }
 
+  if (current_path_->poses.empty()) {
+      return;
+  }
+
   const auto &goal_position = current_path_->poses.back().pose.position;
   double distance_to_goal = computeDistance(robot_odom_->pose.pose.position, goal_position);
   if (distance_to_goal <= goal_tolerance_) {
@@ -68,6 +72,7 @@ geometry_msgs::msg::Twist ControlNode::computeVelocity(const geometry_msgs::msg:
   double current_yaw = extractYaw(robot_odom_->pose.pose.orientation);
 
   double angle_diff = target_angle - current_yaw;
+  angle_diff = std::atan2(std::sin(angle_diff), std::cos(angle_diff));
 
   geometry_msgs::msg::Twist cmd_vel;
   cmd_vel.linear.x = linear_speed_;
